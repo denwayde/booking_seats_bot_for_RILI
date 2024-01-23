@@ -14,7 +14,7 @@ class SetConfigsToBot(StatesGroup):
 logging.basicConfig(level=logging.INFO)
 memstore = MemoryStorage()
 # Initialize bot and dispatcher
-bot = Bot(token="6749302013:AAFIegRcs8h_y-88_rHKQFt24f1dtyxMP3k")
+bot = Bot(token="")
 dp = Dispatcher(bot, storage=memstore)
 
 @dp.message_handler(commands='start', state="*")
