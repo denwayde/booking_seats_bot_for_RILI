@@ -14,3 +14,5 @@ def select_data(selection_query, tup=()):
     cur = connection.cursor()
     cur.execute(selection_query, tup)
     return cur.fetchall()
+
+#print(select_data('SELECT DISTINCT row FROM seats WHERE taken = ? and place = ?', (0, "Партер", )))
