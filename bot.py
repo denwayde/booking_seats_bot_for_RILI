@@ -6,6 +6,17 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils.exceptions import BotBlocked
 from aiogram.types.message import ContentType
 
+from db_func import delete_or_insert_data, select_data
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Загрузка переменных из файла .env
+
+bot_key = os.getenv('BOT_TOKEN')
+payment_key = os.getenv('PAYMENT_TOKEN')
+   
+
 class SetConfigsToBot(StatesGroup):
     waiting_for_set_name = State()
     waiting_for_set_row = State()
@@ -15,9 +26,9 @@ class SetConfigsToBot(StatesGroup):
 logging.basicConfig(level=logging.INFO)
 memstore = MemoryStorage()
 # Initialize bot and dispatcher
-bot = Bot(token="")
+bot = Bot(token=bot_key)
 dp = Dispatcher(bot, storage=memstore)
-TESTPAY_TOKEN = "381764678:TEST:76271"
+TESTPAY_TOKEN = payment_key
 
 @dp.message_handler(commands='start', state="*")
 async def send_welcome(message: types.Message, state: FSMContext):
@@ -31,7 +42,20 @@ async def name_handler(message: types.Message, state: FSMContext):
 
     await state.update_data(chosen_name=message.text)
     fio =  message.text.split(" ")
-    await message.answer(f"Рады познакомиться {fio[1]} {fio[2]}. Выберите пожалуйста ряд")
+    arr = select_data('SELECT DISTINCT row FROM seats WHERE taken = ?', (0,))
+    # buttons = [
+    #     types.InlineKeyboardButton(text="-1", callback_data="num_decr"),
+    #     types.InlineKeyboardButton(text="+1", callback_data="num_incr"),
+    #     types.InlineKeyboardButton(text="Подтвердить", callback_data="num_finish")
+    # ]
+    buttons = []
+    for x in arr:
+        buttons.append(types.InlineKeyboardButton(text=x[0], callback_data=x[0]))
+    # Благодаря row_width=2, в первом ряду будет две кнопки, а оставшаяся одна
+    # уйдёт на следующую строку
+    keyboard = types.InlineKeyboardMarkup(row_width=3)
+    keyboard.add(*buttons)
+    await message.answer(f"Рады познакомиться {fio[1]} {fio[2]}. Выберите пожалуйста ряд", reply_markup=keyboard)
     await bot.send_photo(message.chat.id, photo="http://www.gdk-ufa.ru/i/scheme.jpg")
     await bot.delete_message(message.chat.id, message["message_id"])
     await state.set_state(SetConfigsToBot.waiting_for_set_row.state)
@@ -47,9 +71,8 @@ async def process_pay(message: types.Message):
     if message.successful_payment.invoice_payload == "charity":
         #RABOTAEM S POLZOVATELEM
         await bot.send_message(message.from_user.id, "Vse oplacheno")
-# @dp.message_handler(state=SetConfigsToBot.waiting_for_set_row)
-# async def row_handler(message: types.Message, state: FSMContext):
-#     await state.update_data(row=message.text)
+
+
 
 
 
