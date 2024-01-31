@@ -1,6 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram.filters import Command
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery, PreCheckoutQuery, ContentType
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -86,13 +86,36 @@ async def num_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
     await call.answer()
     await state.set_state(SetConfigsToBot.set_rub)
 
+@router.message(F.text.isdigit()==False, SetConfigsToBot.set_rub)
+async def rub_handler(message: Message, state: FSMContext, bot: Bot):
+    await message.answer('Похоже что Вы написали не число. Попробуйте ввести сумму пожертвования снова')
+    await state.set_state(SetConfigsToBot.set_rub)
 
-@router.message(F.text, SetConfigsToBot.set_rub)
+@router.message(F.text.isdigit(), SetConfigsToBot.set_rub)
 async def rub_handler(message: Message, state: FSMContext, bot: Bot):
     is_rub = fullmatch(r"\d+", message.text)
     if is_rub:
         await state.update_data(rub = message.text)
         await bot.delete_message(message.chat.id, message.message_id-1)
         #await message.amswer(f"Вы ввели: {message.text}.")
-        my_amount = int(message.text + str(00))
-        await bot.send_invoice(chat_id=message.from_user.id, title="Благотворительный взнос", description="Оплата благотворительного фонда для РИЛИ", payload="charity", provider_token=payment_key, currency="RUB", start_parameter="pay_to_RILI_bot", prices=[{'label': 'Руб', 'amount': my_amount}])
+        #my_amount = int(message.text + str(00))
+        # if message.text.isdigit():
+           
+        # else:
+        #     await message.answer('Похоже что Вы написали не число. Попробуйте ввести сумму пожертвования снова')
+        #     await state.set_state(SetConfigsToBot.set_rub)
+        my_amount = int(f'{message.text}00')
+        await bot.send_invoice(chat_id=message.from_user.id, title="Благотворительный взнос", description="Оплата благотворительного фонда для РИЛИ", payload="charity", provider_token=payment_key, currency="RUB", start_parameter="pay_to_RILI_bot", need_phone_number=True, prices=[{'label': 'Руб', 'amount': my_amount}])
+
+@router.pre_checkout_query()
+async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot):
+    print(pre_checkout_query)
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
+
+# @router.message(ContentType.SUCCESSFUL_PAYMENT)
+# async def rub_handler(message: Message, bot: Bot):
+#     print(message)
+#     await message.answer(
+#         'Вроде оплатили'
+#     )
