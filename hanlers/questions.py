@@ -98,13 +98,6 @@ async def rub_handler(message: Message, state: FSMContext, bot: Bot):
     if is_rub:
         await state.update_data(rub = message.text)
         await bot.delete_message(message.chat.id, message.message_id-1)
-        #await message.amswer(f"Вы ввели: {message.text}.")
-        #my_amount = int(message.text + str(00))
-        # if message.text.isdigit():
-           
-        # else:
-        #     await message.answer('Похоже что Вы написали не число. Попробуйте ввести сумму пожертвования снова')
-        #     await state.set_state(SetConfigsToBot.set_rub)
         my_amount = int(f'{message.text}00')
         await bot.send_invoice(chat_id=message.from_user.id, title="Благотворительный взнос", description="Оплата благотворительного фонда для РИЛИ", payload="charity", provider_token=payment_key, currency="RUB", start_parameter="pay_to_RILI_bot", need_phone_number=True, prices=[{'label': 'Руб', 'amount': my_amount}])
 
@@ -122,11 +115,18 @@ async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: 
 # video=None video_note=None voice=None caption=None caption_entities=None has_media_spoiler=None contact=None dice=None game=None poll=None venue=None location=None new_chat_members=None left_chat_member=None new_chat_title=None 
 # new_chat_photo=None delete_chat_photo=None group_chat_created=None supergroup_chat_created=None channel_chat_created=None message_auto_delete_timer_changed=None migrate_to_chat_id=None migrate_from_chat_id=None pinned_message=None invoice=None successful_payment=None users_shared=None chat_shared=None connected_website=None write_access_allowed=None passport_data=None proximity_alert_triggered=None forum_topic_created=None forum_topic_edited=None forum_topic_closed=None forum_topic_reopened=None general_forum_topic_hidden=None general_forum_topic_unhidden=None giveaway_created=None giveaway=None giveaway_winners=None giveaway_completed=None video_chat_scheduled=None video_chat_started=None video_chat_ended=None video_chat_participants_invited=None web_app_data=None reply_markup=None forward_date=None forward_from=None forward_from_chat=None forward_from_message_id=None forward_sender_name=None forward_signature=None user_shared=None"
 
-@router.message(F.textSetConfigsToBot.set_success)
+@router.message(lambda mes: mes.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def rub_handler(message: Message, bot: Bot, state: FSMContext):
-    print(f'message {message}')
-    await message.answer(
-        'Вроде оплатили'
-    )
+    if message.successful_payment!= None: 
+        await message.answer(
+            'fine'
+        )
+    else:
+        await message.answer('bad')
+        state.set_state()
     state_data = await state.get_data()
     #print(state_data)
+
+# @router.message(lambda mes: mes.successful_payment == None)
+# async def rub_handler1(message: Message, bot: Bot, state: FSMContext):
+#     await message.answer('bad')

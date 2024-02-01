@@ -18,7 +18,6 @@ bot_key = os.getenv('BOT_TOKEN')
 async def main():
     bot = Bot(token=bot_key)
     dp = Dispatcher()
-
     dp.include_router(hanlers.questions.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
