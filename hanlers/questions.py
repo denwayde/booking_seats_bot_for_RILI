@@ -108,6 +108,14 @@ async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: 
     await bot.send_message(pre_checkout_query.from_user.id, 'Если вдруг оплата не прошла по техническим причинам, Вы можете повторить платеж.', reply_markup=pay_btns())
     
 
+@router.callback_query(F.data == "pay_again", SetConfigsToBot.set_num)
+async def num_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    my_num = call.data.split('_')
+    await state.update_data(num = my_num[1])
+    await bot.delete_message(call.message.chat.id, call.message.message_id-1)
+    await call.message.answer('Напишите пожалуйста сумму пожертвования для РИЛИ')
+    await call.answer()
+    await state.set_state(SetConfigsToBot.set_rub)
 
 
 
