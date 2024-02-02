@@ -10,6 +10,9 @@ from functions import set_row_handler
 from re import fullmatch
 from dotenv import load_dotenv
 from btns.forPay import pay_btns
+
+from handlers.for_pay import num_handler
+
 import os
 load_dotenv()  # Загрузка переменных из файла .env
 payment_key = os.getenv('PAYMENT_TOKEN')
@@ -36,11 +39,11 @@ async def cmd_start(message: Message, state: FSMContext):
 @router.message(SetConfigsToBot.set_name)
 async def name_proccessor(message: Message, state: FSMContext, bot: Bot):
     await state.update_data(name = message.text)
-    await bot.delete_message(message.chat.id, message.message_id-1)
+    await bot.delete_messages(message.chat.id, (message.message_id, message.message_id-1))
     #await message.delete()
     await message.answer_photo('http://www.gdk-ufa.ru/i/scheme.jpg')
     await message.answer(
-        "Приятно познакомиться. Выберите пожалуйста область зала",
+        f"Приятно познакомиться, {message.text}. Выберите пожалуйста область зала",
         reply_markup = get_places()
         )
     await state.set_state(SetConfigsToBot.set_place)
@@ -65,9 +68,7 @@ async def row_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
     row_num = call.data.split('_')
     await state.update_data(row = row_num[1])
     user_data = await state.get_data()
-    #print(user_data)
-    #await bot.delete_message(call.message.chat.id, call.message.message_id-2)
-    await bot.delete_message(call.message.chat.id, call.message.message_id-1)
+    await bot.delete_messages(call.message.chat.id, (call.message.message_id, call.message.message_id-1, ))
     await call.message.answer_photo('http://www.gdk-ufa.ru/i/scheme.jpg')
     await call.message.answer(
         f"Вы выбрали:\nОбласть зала - {user_data['place']}\nРяд - №{row_num[1]}.\nВыберите пожалуйста место в ряду",
@@ -79,25 +80,22 @@ async def row_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
 
 
 @router.callback_query(F.data.startswith('num_'), SetConfigsToBot.set_num)
-async def num_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    my_num = call.data.split('_')
-    await state.update_data(num = my_num[1])
-    await bot.delete_message(call.message.chat.id, call.message.message_id-1)
-    await call.message.answer('Напишите пожалуйста сумму пожертвования для РИЛИ')
-    await call.answer()
-    await state.set_state(SetConfigsToBot.set_rub)
+async def nnn(call:CallbackQuery, state: FSMContext, bot: Bot):
+    await num_handler(call, state, bot, "Напишите пожалуйста сумму пожертвования", SetConfigsToBot.set_rub)
+
 
 @router.message(F.text.isdigit()==False, SetConfigsToBot.set_rub)
 async def rub_handler(message: Message, state: FSMContext, bot: Bot):
     await message.answer('Похоже что Вы написали не число. Попробуйте ввести сумму пожертвования снова')
     await state.set_state(SetConfigsToBot.set_rub)
 
+
 @router.message(F.text.isdigit(), SetConfigsToBot.set_rub)
 async def rub_handler(message: Message, state: FSMContext, bot: Bot):
     is_rub = fullmatch(r"\d+", message.text)
     if is_rub:
         await state.update_data(rub = message.text)
-        await bot.delete_message(message.chat.id, message.message_id-1)
+        await bot.delete_message(message.chat.id, message.message_id)
         my_amount = int(f'{message.text}00')
         await bot.send_invoice(chat_id=message.from_user.id, title="Благотворительный взнос", description="Оплата благотворительного фонда для РИЛИ", payload="charity", provider_token=payment_key, currency="RUB", start_parameter="pay_to_RILI_bot", need_phone_number=True, prices=[{'label': 'Руб', 'amount': my_amount}])
 
@@ -108,29 +106,21 @@ async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: 
     await bot.send_message(pre_checkout_query.from_user.id, 'Если вдруг оплата не прошла по техническим причинам, Вы можете повторить платеж.', reply_markup=pay_btns())
     
 
-@router.callback_query(F.data == "pay_again", SetConfigsToBot.set_num)
-async def num_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    my_num = call.data.split('_')
-    await state.update_data(num = my_num[1])
-    await bot.delete_message(call.message.chat.id, call.message.message_id-1)
-    await call.message.answer('Напишите пожалуйста сумму пожертвования для РИЛИ')
-    await call.answer()
-    await state.set_state(SetConfigsToBot.set_rub)
+@router.callback_query(F.data == "pay_again")
+async def nnnn(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await num_handler(call, state, bot, 'Введите пожалуйста сумму платежа', SetConfigsToBot.set_rub)
 
 
 
 @router.message(lambda mes: mes.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def rub_handler(message: Message, bot: Bot, state: FSMContext):
-    if message.successful_payment!= None: 
-        await message.answer('Оплата прошла успешно')
+    await bot.delete_message(message.chat.id, message.message_id-1)
+    await message.answer('Оплата прошла успешно')
     state_data = await state.get_data()
     await state.clear()
     #print(state_data)
 
 
-"pre_chekaut:id='8373641205417204608' from_user=User(id=1949640271, is_bot=False, first_name='Dinis', last_name='R', username='Dinis_Fizik', language_code='ru', is_premium=None, added_to_attachment_menu=None, can_join_groups=None, can_read_all_group_messages=None, supports_inline_queries=None) currency='RUB' total_amount=90000 invoice_payload='charity' shipping_option_id=None order_info=OrderInfo(name=None, phone_number='79603927490', email=None, shipping_address=None)"    
-
-"pre_chekaut:id='8373641206789758248' from_user=User(id=1949640271, is_bot=False, first_name='Dinis', last_name='R', username='Dinis_Fizik', language_code='ru', is_premium=None, added_to_attachment_menu=None, can_join_groups=None, can_read_all_group_messages=None, supports_inline_queries=None) currency='RUB' total_amount=120000 invoice_payload='charity' shipping_option_id=None order_info=OrderInfo(name=None, phone_number='79603927490', email=None, shipping_address=None)"
 
 # @router.message(lambda mes: mes.successful_payment == None)
 # async def rub_handler1(message: Message, bot: Bot, state: FSMContext):

@@ -3,7 +3,7 @@ from aiogram import Bot, Dispatcher
 # from config_handler import settings
 from dotenv import load_dotenv
 import os
-import hanlers.questions
+import my_routers.questions
 
 
 load_dotenv()  # Загрузка переменных из файла .env
@@ -18,7 +18,7 @@ bot_key = os.getenv('BOT_TOKEN')
 async def main():
     bot = Bot(token=bot_key)
     dp = Dispatcher()
-    dp.include_router(hanlers.questions.router)
+    dp.include_router(my_routers.questions.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
     # Да, этот метод можно вызвать даже если у вас поллинг

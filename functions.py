@@ -8,8 +8,6 @@ async def set_row_handler(call, state, message_data, bot, state_param):
          f"Вы выбрали {message_data}. Выберите пожалуйста ряд.",
         reply_markup = get_rows(message_data)
     )
-    await bot.delete_message(call.message.chat.id, call.message.message_id-2)
-    await bot.delete_message(call.message.chat.id, call.message.message_id-1)
-    await call.message.delete()
+    await bot.delete_messages(call.message.chat.id, (call.message.message_id, call.message.message_id-1, ))
     await call.answer()
     await state.set_state(state_param)
