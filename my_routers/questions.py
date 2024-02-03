@@ -13,7 +13,7 @@ from btns.forPay import pay_btns
 from handlers.for_pay import num_handler
 from btns.forSettings import settings_keyboard
 from random import randint
-
+from handlers.for_send_admin import send_message_to_admin, reply_for_msg_to_admin
 import os
 load_dotenv()  # Загрузка переменных из файла .env
 payment_key = os.getenv('PAYMENT_TOKEN')
@@ -26,6 +26,7 @@ class SetConfigsToBot(StatesGroup):
     set_num = State()
     set_rub = State()
     set_success = State()
+    msg_to_admin = State()
 
 router = Router()  # [1]
 
@@ -112,6 +113,13 @@ async def nnnn(call: CallbackQuery, state: FSMContext, bot: Bot):
     await num_handler(call, state, bot, 'Введите пожалуйста сумму платежа', SetConfigsToBot.set_rub)
 
 
+@router.callback_query(F.data == "send_to_admin", StateFilter(None))
+async def sss(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await send_message_to_admin(call, state, bot, 'Напишите сообщение администратору. Если захотите получить обратную связь напишите ссылку на ваш аккаунт в телеграмме.', SetConfigsToBot.msg_to_admin)
+
+@router.message(SetConfigsToBot.msg_to_admin)
+async def sss1(message:Message, state:FSMContext, bot:Bot):
+    await reply_for_msg_to_admin(message, state, bot, "Ваше сообщения отправлено администратору. При необходимости он с Вами свяжется")
 
 @router.message(lambda mes: mes.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def rub_handler(message: Message, bot: Bot, state: FSMContext):

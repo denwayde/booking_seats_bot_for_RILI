@@ -6,7 +6,8 @@ def pay_btns() -> InlineKeyboardMarkup:
     # kb.button(text="Да")
     # kb.button(text="Нет")
     buttons = [
-        InlineKeyboardButton(text="Повторить платеж", callback_data="pay_again"),     
+        InlineKeyboardButton(text="Повторить платеж", callback_data="pay_again"),
+        InlineKeyboardButton(text="Написать администратору", callback_data="send_to_admin"),     
     ]
     kb.add(*buttons)
     kb.adjust(1)
