@@ -6,12 +6,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from btns.forPlace import get_places
 from btns.forNum import get_nums
-from functions import set_row_handler
+from handlers.for_row import set_row_handler
 from re import fullmatch
 from dotenv import load_dotenv
 from btns.forPay import pay_btns
-
 from handlers.for_pay import num_handler
+from btns.forSettings import settings_keyboard
+from random import randint
 
 import os
 load_dotenv()  # Загрузка переменных из файла .env
@@ -115,8 +116,11 @@ async def nnnn(call: CallbackQuery, state: FSMContext, bot: Bot):
 @router.message(lambda mes: mes.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def rub_handler(message: Message, bot: Bot, state: FSMContext):
     await bot.delete_message(message.chat.id, message.message_id-1)
-    await message.answer('Оплата прошла успешно')
+    invitation_code = randint(1000, 9999)
     state_data = await state.get_data()
+    print(state_data)
+    await message.answer(f"Оплата прошла успешно.\nНа имя: {state_data['name']}\nВаше место: {state_data['place']}, Ряд - {state_data['row']}, Номер - {state_data['num']}\nВаш пригласительный код: <b>{invitation_code}</b>.\nПокажите эти данные при входе в зал.",reply_markup=settings_keyboard() , parse_mode='HTML')
+    
     await state.clear()
     #print(state_data)
 
