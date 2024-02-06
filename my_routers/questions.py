@@ -108,7 +108,7 @@ async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: 
     await bot.send_message(pre_checkout_query.from_user.id, 'Если вдруг оплата не прошла по техническим причинам, Вы можете повторить платеж.', reply_markup=pay_btns())
     
 
-@router.callback_query(F.data == "pay_again")
+@router.callback_query(F.data == "payagain")
 async def nnnn(call: CallbackQuery, state: FSMContext, bot: Bot):
     await num_handler(call, state, bot, 'Введите пожалуйста сумму платежа', SetConfigsToBot.set_rub)
 
