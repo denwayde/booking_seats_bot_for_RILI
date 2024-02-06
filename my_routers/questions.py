@@ -15,6 +15,7 @@ from btns.forSettings import settings_keyboard
 from random import randint
 from handlers.for_send_admin import send_message_to_admin, reply_for_msg_to_admin
 import os
+from handlers.for_start import start_func
 load_dotenv()  # Загрузка переменных из файла .env
 payment_key = os.getenv('PAYMENT_TOKEN')
 
@@ -31,12 +32,14 @@ class SetConfigsToBot(StatesGroup):
 router = Router()  # [1]
 
 @router.message(Command("start"), StateFilter(None))  # [2]
-async def cmd_start(message: Message, state: FSMContext):
-    await state.clear()
-    await message.answer(
-        "Здравствуйте, Вас приветсвует бот, который поможет Вам забронировать место в зале. Давайте приступим.\nНапишите пожалуйста боту ФИО"
-    )
-    await state.set_state(SetConfigsToBot.set_name)
+async def cmd_start(message: Message, state: FSMContext, bot: Bot):
+    await start_func(
+        message,
+        state,
+        'Здравствуйте, Вас приветсвует бот, который поможет Вам забронировать место в зале. Давайте приступим.\nНапишите пожалуйста боту ФИО',
+        SetConfigsToBot.set_name,
+        bot
+        )
 
 @router.message(SetConfigsToBot.set_name)
 async def name_proccessor(message: Message, state: FSMContext, bot: Bot):
@@ -110,16 +113,8 @@ async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: 
 
 @router.callback_query(F.data == "payagain")
 async def nnnn(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await num_handler(call, state, bot, 'Введите пожалуйста сумму платежа', SetConfigsToBot.set_rub)
+    await num_handler(call, state, bot, 'Проверьте баланс Вашей карты. Или измените сумму платежа и попробуйте ввести эту сумму.', SetConfigsToBot.set_rub)
 
-
-@router.callback_query(F.data == "send_to_admin", StateFilter(None))
-async def sss(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await send_message_to_admin(call, state, bot, 'Напишите сообщение администратору. Если захотите получить обратную связь напишите ссылку на ваш аккаунт в телеграмме.', SetConfigsToBot.msg_to_admin)
-
-@router.message(SetConfigsToBot.msg_to_admin)
-async def sss1(message:Message, state:FSMContext, bot:Bot):
-    await reply_for_msg_to_admin(message, state, bot, "Ваше сообщения отправлено администратору. При необходимости он с Вами свяжется")
 
 @router.message(lambda mes: mes.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def rub_handler(message: Message, bot: Bot, state: FSMContext):
@@ -130,10 +125,17 @@ async def rub_handler(message: Message, bot: Bot, state: FSMContext):
     await message.answer(f"Оплата прошла успешно.\nНа имя: {state_data['name']}\nВаше место: {state_data['place']}, Ряд - {state_data['row']}, Номер - {state_data['num']}\nВаш пригласительный код: <b>{invitation_code}</b>.\nПокажите эти данные при входе в зал.",reply_markup=settings_keyboard() , parse_mode='HTML')
     
     await state.clear()
-    #print(state_data)
 
 
+@router.message(F.text == "Написать администратору бота", StateFilter(None))
+async def sss(message:Message, state: FSMContext, bot: Bot):
+    await send_message_to_admin(message, state, bot, 'Напишите сообщение администратору. Если захотите получить обратную связь напишите ссылку на ваш аккаунт в телеграмме.', SetConfigsToBot.msg_to_admin)
 
-# @router.message(lambda mes: mes.successful_payment == None)
-# async def rub_handler1(message: Message, bot: Bot, state: FSMContext):
-#     await message.answer('bad')
+@router.message(SetConfigsToBot.msg_to_admin)
+async def sss1(message:Message, state:FSMContext, bot:Bot):
+    await reply_for_msg_to_admin(message, state, bot, "Ваше сообщения отправлено администратору. При необходимости он с Вами свяжется")
+
+
+@router.message(F.text == "Забронировать еще место", StateFilter(None))
+async def zabronirovat_eshe(message:Message, state: FSMContext, bot: Bot):
+    await start_func(message, state, 'Напишите пожалуйста ФИО, для кого нужно забронировать место', SetConfigsToBot.set_name, bot)
