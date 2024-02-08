@@ -9,7 +9,7 @@ async def rub_handler(message, bot, state):
     print(state_data)
 
     delete_or_insert_data(
-        "UPDATE seats SET taken = 1 WHERE place = ? row = ? num = ?",
+        "UPDATE seats SET taken = 1 WHERE place = ? and row = ? and num = ?",
         (
             state_data['place'],
             state_data['row'],

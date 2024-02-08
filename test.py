@@ -1,11 +1,10 @@
-slovar = {
-    'name': "Rob",
-    'age': 21
-}
+from db_func import select_data
 
-slovar1 = {
-    'name': "Billi",
-    'age': 14
-}
-slovar = slovar1
-print(slovar)
+arr = select_data(
+        "select * from users where telega_id = ?",
+        (
+            1949640271,
+        )
+    )
+#print(arr)
+

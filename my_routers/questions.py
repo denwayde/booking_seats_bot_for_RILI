@@ -14,6 +14,9 @@ from handlers.for_pay import num_handler
 from handlers.for_send_admin import send_message_to_admin, reply_for_msg_to_admin
 import os
 from handlers.for_start import start_func
+from handlers.for_success_pay import rub_handler
+from handlers.for_cancel_booking import cancel_booking, cancel_booking1
+
 load_dotenv()  # Загрузка переменных из файла .env
 payment_key = os.getenv('PAYMENT_TOKEN')
 
@@ -26,6 +29,7 @@ class SetConfigsToBot(StatesGroup):
     set_rub = State()
     set_success = State()
     msg_to_admin = State()
+    set_cancel_booking = State()
 
 router = Router()  # [1]
 
@@ -131,3 +135,12 @@ async def sss1(message:Message, state:FSMContext, bot:Bot):
 @router.message(F.text == "Забронировать еще место", StateFilter(None))
 async def zabronirovat_eshe(message:Message, state: FSMContext, bot: Bot):
     await start_func(message, state, 'Напишите пожалуйста ФИО, для кого нужно забронировать место', SetConfigsToBot.set_name, bot)
+
+
+@router.message(F.text == "Отменить бронь", StateFilter(None))
+async def cancel_process(message:Message, state: FSMContext, bot: Bot):
+    await cancel_booking(message, state, 'Выберите пожалуйста бронь для отмены', SetConfigsToBot.set_cancel_booking, bot)
+
+@router.callback_query(F.data.startswith('bookings_'), SetConfigsToBot.set_cancel_booking)
+async def cancel_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await cancel_booking1(call, state, bot, 'Выбранная Вами бронь отменена. Модераторы бота, переведут Вам Ваши средства в банк привязанный к Вашему номеру телефона. Или свяжутся с Вами по указанному номеру.')
