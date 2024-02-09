@@ -3,7 +3,7 @@ from db_func import delete_or_insert_data
 
 async def cancel_booking(message, state, text, new_state, bot):
     await bot.delete_message(message.chat.id, message.message_id)
-    await message.answer(text, reply_markup = get_bookings(message.chat.id))
+    await message.answer(text, reply_markup = get_bookings(message.chat.id, 'bookings_'))
     await state.set_state(new_state)
 
 #callback_data=f'bookings_{x[3]}_{x[4]}_{x[5]}'

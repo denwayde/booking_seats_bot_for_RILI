@@ -144,3 +144,17 @@ async def cancel_process(message:Message, state: FSMContext, bot: Bot):
 @router.callback_query(F.data.startswith('bookings_'), SetConfigsToBot.set_cancel_booking)
 async def cancel_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
     await cancel_booking1(call, state, bot, 'Выбранная Вами бронь отменена. Модераторы бота, переведут Вам Ваши средства в банк привязанный к Вашему номеру телефона. Или свяжутся с Вами по указанному номеру.')
+
+
+from handlers.for_change_booking import change_booking, change_booking_parametr
+SetConfigsToBot.set_change_booking = State()
+SetConfigsToBot.set_parametr_change_booking = State()
+
+@router.message(F.text == "Изменить место", StateFilter(None))
+async def change_process(message:Message, state: FSMContext, bot: Bot):
+    await change_booking(message, state, bot, 'Выберите бронь, которую нужно изменить', SetConfigsToBot.set_change_booking)
+
+
+@router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_change_booking)
+async def change_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await change_booking_parametr(call, state, bot, 'Выберите параметр брони, который нужно изменить', SetConfigsToBot.set_parametr_change_booking)
