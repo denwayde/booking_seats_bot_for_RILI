@@ -35,30 +35,17 @@ router = Router()  # [1]
 
 @router.message(Command("start"), StateFilter(None))  # [2]
 async def cmd_start(message: Message, state: FSMContext, bot: Bot):
-    await start_func(
-        message,
-        state,
-        'Здравствуйте, Вас приветсвует бот, который поможет Вам забронировать место в зале. Давайте приступим.\nНапишите пожалуйста боту ФИО',
-        SetConfigsToBot.set_name,
-        bot
-        )
+    await start_func(message, state, 'Здравствуйте, Вас приветсвует бот, который поможет Вам забронировать место в зале. Давайте приступим.\nНапишите пожалуйста боту ФИО', SetConfigsToBot.set_name, bot)
 
+from handlers.for_get_name import name_proccessor
 @router.message(SetConfigsToBot.set_name)
-async def name_proccessor(message: Message, state: FSMContext, bot: Bot):
-    await state.update_data(name = message.text)
-    await bot.delete_messages(message.chat.id, (message.message_id, message.message_id-1))
-    #await message.delete()
-    await message.answer_photo('http://www.gdk-ufa.ru/i/scheme.jpg')
-    await message.answer(
-        f"Приятно познакомиться, {message.text}. Выберите пожалуйста область зала",
-        reply_markup = get_places()
-        )
-    await state.set_state(SetConfigsToBot.set_place)
+async def sss_name(message: Message, state: FSMContext, bot: Bot):
+    await name_proccessor(message, state, bot, f"Приятно познакомиться, {message.text}. Выберите пожалуйста область зала", SetConfigsToBot.set_place)
 
 
 
 @router.callback_query(F.data.startswith('place_'), SetConfigsToBot.set_place)
-async def place_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+async def place_handler(call: CallbackQuery, state: FSMContext, bot: Bot):#vot tut ty konechno tupanul b..
     message_data = call.data.split('_')
     if message_data[1] == 'parter':
         await set_row_handler(call, state, "Партер", bot, SetConfigsToBot.set_row)
@@ -70,19 +57,10 @@ async def place_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
         await set_row_handler(call, state, "Балкон (Левое крыло)", bot, SetConfigsToBot.set_row)
 
 
+from handlers.for_set_row import row_handler
 @router.callback_query(F.data.startswith('row_'), SetConfigsToBot.set_row)
-async def row_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    row_num = call.data.split('_')
-    await state.update_data(row = row_num[1])
-    user_data = await state.get_data()
-    await bot.delete_messages(call.message.chat.id, (call.message.message_id, call.message.message_id-1, ))
-    await call.message.answer_photo('http://www.gdk-ufa.ru/i/scheme.jpg')
-    await call.message.answer(
-        f"Вы выбрали:\nОбласть зала - {user_data['place']}\nРяд - №{row_num[1]}.\nВыберите пожалуйста место в ряду",
-        reply_markup=get_nums(row_num[1], user_data['place'])
-    )
-    await call.answer()
-    await state.set_state(SetConfigsToBot.set_num)
+async def sss_row_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await row_handler(call, state, bot, f"Вы выбрали:\nОбласть зала - {user_data['place']}\nРяд - №{row_num[1]}.\nВыберите пожалуйста место в ряду", SetConfigsToBot.set_num)
 
 
 
@@ -158,3 +136,7 @@ async def change_process(message:Message, state: FSMContext, bot: Bot):
 @router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_change_booking)
 async def change_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
     await change_booking_parametr(call, state, bot, 'Выберите параметр брони, который нужно изменить', SetConfigsToBot.set_parametr_change_booking)
+
+@router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_change_booking)
+async def change_process2(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await change_booking_
