@@ -52,6 +52,7 @@ async def place_handler(call: CallbackQuery, state: FSMContext, bot: Bot):#vot t
 from handlers.for_set_row import row_handler
 @router.callback_query(F.data.startswith('row_'), SetConfigsToBot.set_row)
 async def sss_row_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    if 
     await row_handler(call, state, bot, f"Вы выбрали:\nОбласть зала - {await call.get_data()['place']}\nРяд - №{call.data.split('_')[1]}.\nВыберите пожалуйста место в ряду", SetConfigsToBot.set_num)
 
 
@@ -127,9 +128,11 @@ async def change_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
     await change_booking_parametr(call, state, bot, 'Выберите параметр брони, который нужно изменить', SetConfigsToBot.set_parametr_change_booking)
 
 
-@router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_change_booking)
+@router.callback_query(F.data.startswith('changeParametr_'), SetConfigsToBot.set_change_booking)
 async def change_process2(call: CallbackQuery, state: FSMContext, bot: Bot):
     await change_parametr(call, state, bot)
 
+
 @router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_new_row)
 async def change_process3(call: CallbackQuery, state: FSMContext, bot: Bot):
+    
