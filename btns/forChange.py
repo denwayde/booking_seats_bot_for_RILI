@@ -3,6 +3,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 def get_change_parametr(arr) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.row(InlineKeyboardButton(text = arr[1], callback_data=f"changeparametr_{arr[1]}"))
-    kb.row(InlineKeyboardButton(text=f'Ряд {arr[2]}', callback_data=f"changeparametr_{arr[2]}"), InlineKeyboardButton(text=f'Место {arr[3]}', callback_data=f"changeparametr_{arr[3]}"))
+    kb.row(InlineKeyboardButton(text = arr[1], callback_data=f"mesto_{arr[1]}"))
+    kb.row(InlineKeyboardButton(text=f'Ряд {arr[2]}', callback_data=f"ryad_{arr[2]}"), InlineKeyboardButton(text=f'Место {arr[3]}', callback_data=f"num_{arr[3]}"))
     return kb.as_markup(resize_keyboard=True)

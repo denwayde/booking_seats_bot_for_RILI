@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery, PreCheckoutQuery, ContentType
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
+from states import SetConfigsToBot
 from btns.forPlace import get_places
 from btns.forNum import get_nums
 from handlers.for_row import set_row_handler
@@ -21,15 +21,7 @@ load_dotenv()  # Загрузка переменных из файла .env
 payment_key = os.getenv('PAYMENT_TOKEN')
 
 
-class SetConfigsToBot(StatesGroup):
-    set_name = State()
-    set_place = State()
-    set_row = State()
-    set_num = State()
-    set_rub = State()
-    set_success = State()
-    msg_to_admin = State()
-    set_cancel_booking = State()
+
 
 router = Router()  # [1]
 
@@ -60,7 +52,7 @@ async def place_handler(call: CallbackQuery, state: FSMContext, bot: Bot):#vot t
 from handlers.for_set_row import row_handler
 @router.callback_query(F.data.startswith('row_'), SetConfigsToBot.set_row)
 async def sss_row_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await row_handler(call, state, bot, f"Вы выбрали:\nОбласть зала - {user_data['place']}\nРяд - №{row_num[1]}.\nВыберите пожалуйста место в ряду", SetConfigsToBot.set_num)
+    await row_handler(call, state, bot, f"Вы выбрали:\nОбласть зала - {await call.get_data()['place']}\nРяд - №{call.data.split('_')[1]}.\nВыберите пожалуйста место в ряду", SetConfigsToBot.set_num)
 
 
 
@@ -124,7 +116,7 @@ async def cancel_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
     await cancel_booking1(call, state, bot, 'Выбранная Вами бронь отменена. Модераторы бота, переведут Вам Ваши средства в банк привязанный к Вашему номеру телефона. Или свяжутся с Вами по указанному номеру.')
 
 
-from handlers.for_change_booking import change_booking, change_booking_parametr
+from handlers.for_change_booking import change_booking, change_booking_parametr, change_parametr
 SetConfigsToBot.set_change_booking = State()
 SetConfigsToBot.set_parametr_change_booking = State()
 
@@ -137,6 +129,7 @@ async def change_process(message:Message, state: FSMContext, bot: Bot):
 async def change_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
     await change_booking_parametr(call, state, bot, 'Выберите параметр брони, который нужно изменить', SetConfigsToBot.set_parametr_change_booking)
 
+
 @router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_change_booking)
 async def change_process2(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await change_booking_
+    await change_parametr(call, state, bot)
