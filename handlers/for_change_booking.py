@@ -22,9 +22,9 @@ async def change_booking_parametr(call, state, bot, text, new_state):
 
 async def change_parametr(call, state, bot):
     arr = call.data.split("_")
-    if arr[0] == "mesto":
+    if arr[1] == "mesto":
         await name_proccessor(call.message, state, bot, "Выберите пожалуйста область зала", SetConfigsToBot.set_place)
-    elif arr[0] == "ryad":
-        await set_row_handler(call, state, arr[1], bot, SetConfigsToBot.set_row)
-    elif arr[0] == "num":
+    elif arr[1] == "ryad":
+        await set_row_handler(call, state, arr[2], bot, SetConfigsToBot.set_row)
+    elif arr[1] == "num":
         await row_handler(call, state, bot, "Выберите пожалуйста место в ряду", SetConfigsToBot.set_new_row)

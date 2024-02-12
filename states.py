@@ -10,3 +10,5 @@ class SetConfigsToBot(StatesGroup):
     msg_to_admin = State()
     set_cancel_booking = State()
     set_new_row = State()
+    set_change_booking = State()
+    set_parametr_change_booking = State()

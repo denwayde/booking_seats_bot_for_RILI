@@ -4,8 +4,8 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery, PreChecko
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from states import SetConfigsToBot
-from btns.forPlace import get_places
-from btns.forNum import get_nums
+# from btns.forPlace import get_places
+# from btns.forNum import get_nums
 from handlers.for_row import set_row_handler
 from re import fullmatch
 from dotenv import load_dotenv
@@ -117,9 +117,6 @@ async def cancel_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
 
 
 from handlers.for_change_booking import change_booking, change_booking_parametr, change_parametr
-SetConfigsToBot.set_change_booking = State()
-SetConfigsToBot.set_parametr_change_booking = State()
-
 @router.message(F.text == "Изменить место", StateFilter(None))
 async def change_process(message:Message, state: FSMContext, bot: Bot):
     await change_booking(message, state, bot, 'Выберите бронь, которую нужно изменить', SetConfigsToBot.set_change_booking)
@@ -133,3 +130,6 @@ async def change_process1(call: CallbackQuery, state: FSMContext, bot: Bot):
 @router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_change_booking)
 async def change_process2(call: CallbackQuery, state: FSMContext, bot: Bot):
     await change_parametr(call, state, bot)
+
+@router.callback_query(F.data.startswith('change_'), SetConfigsToBot.set_new_row)
+async def change_process3(call: CallbackQuery, state: FSMContext, bot: Bot):
