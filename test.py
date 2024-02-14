@@ -1,10 +1,6 @@
 from db_func import select_data
 
-arr = select_data(
-        "select * from users where telega_id = ?",
-        (
-            1949640271,
-        )
-    )
-#print(arr)
+user_db_data = select_data("SELECT*FROM users WHERE invintation_code = ?", (8917, ))[0]
+print(user_db_data)
+
 
