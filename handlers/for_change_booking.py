@@ -15,7 +15,7 @@ async def change_booking(message, state, bot, text, new_state):
 async def change_booking_parametr(call, state, bot, text, new_state):
     arr = call.data.split('_')
     invintation_code = select_data("select invintation_code from users where telega_id = ? and place = ? and row = ? and num = ? and canceled = 0", (call.message.chat.id, arr[1], arr[2], arr[3],))[0][0]
-    state.update_data(code = invintation_code)
+    await state.update_data(code = invintation_code)
     await bot.delete_message(call.message.chat.id, call.message.message_id)
     await call.answer()
     await call.message.answer(text, reply_markup = get_change_parametr(arr))

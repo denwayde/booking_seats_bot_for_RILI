@@ -52,7 +52,8 @@ async def place_handler(call: CallbackQuery, state: FSMContext, bot: Bot):#vot t
 from handlers.for_set_row import row_handler
 @router.callback_query(F.data.startswith('row_'), SetConfigsToBot.set_row)
 async def sss_row_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await row_handler(call, state, bot, f"Вы выбрали:\nОбласть зала - {await call.get_data()['place']}\nРяд - №{call.data.split('_')[1]}.\nВыберите пожалуйста место в ряду", SetConfigsToBot.set_num)
+    user_data = await state.get_data()
+    await row_handler(call, state, bot, f"Вы выбрали:\nОбласть зала - {user_data['place']}\nРяд - №{call.data.split('_')[1]}.\nВыберите пожалуйста место в ряду", SetConfigsToBot.set_num)
 
 
 from handlers.finish_handle import succeed_changing

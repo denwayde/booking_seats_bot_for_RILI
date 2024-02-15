@@ -1,6 +1,5 @@
 from btns.forRows import get_rows
 
-
 async def set_row_handler(call, state, message_data, bot, state_param):
     await state.update_data(place = message_data)
     await call.message.answer_photo('http://www.gdk-ufa.ru/i/scheme.jpg')
